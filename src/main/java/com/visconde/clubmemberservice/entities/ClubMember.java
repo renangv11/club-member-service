@@ -1,14 +1,19 @@
 package com.visconde.clubmemberservice.entities;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import org.hibernate.validator.constraints.UniqueElements;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.time.LocalDate;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity(name = "socio_torcedor")
 public class ClubMember {
 
@@ -23,7 +28,7 @@ public class ClubMember {
     private String clubMemberEmail;
 
     @Column(name = "data_nascimento_socio")
-    private String clubMemberBirthday;
+    private LocalDate clubMemberBirthday;
 
     @Column(name = "clube_socio")
     private String clubMemberTeam;

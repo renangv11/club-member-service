@@ -1,8 +1,16 @@
 package com.visconde.clubmemberservice.datacontract;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Data
 public class ClubMemberDataContract {
 
@@ -16,7 +24,7 @@ public class ClubMemberDataContract {
     private String clubMemberEmail;
 
     @JsonProperty("data_nascimento_socio")
-    private String clubMemberBirthday;
+    private LocalDate clubMemberBirthday;
 
     @JsonProperty("clube_socio")
     private String clubMemberTeam;

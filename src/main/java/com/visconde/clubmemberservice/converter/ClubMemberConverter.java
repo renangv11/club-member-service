@@ -16,7 +16,7 @@ public class ClubMemberConverter {
 
     public ClubMember convertDataContractToEntity(ClubMemberDataContract clubMemberDataContract){
         ClubMember clubMember = new ClubMember();
-        copyProperties(clubMember, clubMemberDataContract);
+        copyProperties(clubMemberDataContract, clubMember);
         return clubMember;
     }
 
