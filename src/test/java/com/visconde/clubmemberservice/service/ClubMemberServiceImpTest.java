@@ -7,6 +7,7 @@ import com.visconde.clubmemberservice.entities.ClubMember;
 import com.visconde.clubmemberservice.exceptions.AlreadyRegisteredClientException;
 import com.visconde.clubmemberservice.gateway.CampaignClient;
 import com.visconde.clubmemberservice.gateway.CampaignDataContract;
+import com.visconde.clubmemberservice.producer.AssociateCampaignProducer;
 import com.visconde.clubmemberservice.repository.ClubMemberRepository;
 import com.visconde.clubmemberservice.service.imp.ClubMemberServiceImp;
 import org.junit.Assert;
@@ -30,9 +31,9 @@ public class ClubMemberServiceImpTest {
     private ClubMemberRepository clubMemberRepository = mock(ClubMemberRepository.class);
     private CampaignClient campaignClient = mock(CampaignClient.class);
     private ClubMemberConverter clubMemberConverter = mock(ClubMemberConverter.class);
-    private CampaignService campaignService = mock(CampaignService.class);
+    private AssociateCampaignProducer associateCampaignProducer = mock(AssociateCampaignProducer.class);
 
-    private ClubMemberService clubMemberService = new ClubMemberServiceImp(clubMemberRepository, campaignClient, clubMemberConverter, campaignService);
+    private ClubMemberService clubMemberService = new ClubMemberServiceImp(clubMemberRepository, campaignClient, clubMemberConverter, associateCampaignProducer);
 
     @Test(expected = AlreadyRegisteredClientException.class)
     public void should_return_exception_already_registered_club_member(){
@@ -44,6 +45,7 @@ public class ClubMemberServiceImpTest {
         clubMemberService.createClubMember(mockClubMemberDataContract());
     }
 
+    @Test
     public void should_associate_campaigns_for_a_already_registered_club_member(){
         when(clubMemberRepository.findByClubMemberEmail("joao.avelange@testemail.com"))
                 .thenReturn(Optional.of(mockClubMemberRepository()));
@@ -52,13 +54,14 @@ public class ClubMemberServiceImpTest {
 
         ClubMemberResponseDataContract clubMember = clubMemberService.createClubMember(mockClubMemberDataContract());
 
-        verify(campaignService).associateCampaign(any(ClubMemberDataContract.class));
+        verify(associateCampaignProducer).send(any(ClubMemberDataContract.class));
         assertEquals("João Avelange", clubMember.getClubMemberDataContract().getClubMemberName());
         assertEquals(of(1994, 01, 22), clubMember.getClubMemberDataContract().getClubMemberBirthday());
         assertEquals("joao.avelange@testemail.com", clubMember.getClubMemberDataContract().getClubMemberEmail());
         assertEquals(valueOf(1), clubMember.getClubMemberDataContract().getClubMemberId());
     }
 
+    @Test
     public void should_associate_campaigns_and_register_club_member(){
         when(clubMemberRepository.findByClubMemberEmail("joao.avelange@testemail.com"))
                 .thenReturn(empty());
@@ -69,7 +72,7 @@ public class ClubMemberServiceImpTest {
 
         verify(clubMemberConverter).convertDataContractToEntity(any(ClubMemberDataContract.class));
         verify(clubMemberRepository).save(Mockito.any(ClubMember.class));
-        verify(campaignService).associateCampaign(any(ClubMemberDataContract.class));
+        verify(associateCampaignProducer).send(any(ClubMemberDataContract.class));
         assertEquals("João Avelange", clubMember.getClubMemberDataContract().getClubMemberName());
         assertEquals(of(1994, 01, 22), clubMember.getClubMemberDataContract().getClubMemberBirthday());
         assertEquals("joao.avelange@testemail.com", clubMember.getClubMemberDataContract().getClubMemberEmail());

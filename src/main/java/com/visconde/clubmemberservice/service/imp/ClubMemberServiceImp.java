@@ -7,8 +7,8 @@ import com.visconde.clubmemberservice.entities.ClubMember;
 import com.visconde.clubmemberservice.exceptions.AlreadyRegisteredClientException;
 import com.visconde.clubmemberservice.gateway.CampaignClient;
 import com.visconde.clubmemberservice.gateway.CampaignDataContract;
+import com.visconde.clubmemberservice.producer.AssociateCampaignProducer;
 import com.visconde.clubmemberservice.repository.ClubMemberRepository;
-import com.visconde.clubmemberservice.service.CampaignService;
 import com.visconde.clubmemberservice.service.ClubMemberService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class ClubMemberServiceImp implements ClubMemberService {
     private final ClubMemberRepository clubMemberRepository;
     private final CampaignClient campaignClient;
     private final ClubMemberConverter clubMemberConverter;
-    private final CampaignService campaignService;
+    private final AssociateCampaignProducer associateCampaignProducer;
 
     @Override
     public ClubMemberResponseDataContract createClubMember(ClubMemberDataContract clubMemberDataContract) {
@@ -44,7 +44,7 @@ public class ClubMemberServiceImp implements ClubMemberService {
             throw new AlreadyRegisteredClientException("Cliente já cadastrado");
         }
 
-        campaignService.associateCampaign(clubMemberConverter.convertEntityToDataContract(clubMember));
+        associateCampaignProducer.send(clubMemberConverter.convertEntityToDataContract(clubMember));
 
         return ClubMemberResponseDataContract.builder()
                 .campaigns(campaigns)
@@ -56,7 +56,7 @@ public class ClubMemberServiceImp implements ClubMemberService {
         ClubMember clubMember = clubMemberConverter.convertDataContractToEntity(clubMemberDataContract);
         clubMemberRepository.save(clubMember);
 
-        campaignService.associateCampaign(clubMemberConverter.convertEntityToDataContract(clubMember));
+        associateCampaignProducer.send(clubMemberConverter.convertEntityToDataContract(clubMember));
 
         return ClubMemberResponseDataContract.builder()
                 .clubMemberDataContract(clubMemberDataContract)
