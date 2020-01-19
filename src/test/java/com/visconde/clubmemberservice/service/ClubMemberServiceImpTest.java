@@ -39,7 +39,7 @@ public class ClubMemberServiceImpTest {
     public void should_return_exception_already_registered_club_member(){
         when(clubMemberRepository.findByClubMemberEmail("joao.avelange@testemail.com"))
                 .thenReturn(Optional.of(mockClubMemberRepository()));
-        when(campaignClient.getCampaignByUserId(1l))
+        when(campaignClient.getCampaignsByTeamName(Mockito.any()))
                 .thenReturn(mockCampaigns());
 
         clubMemberService.createClubMember(mockClubMemberDataContract());
@@ -49,7 +49,7 @@ public class ClubMemberServiceImpTest {
     public void should_associate_campaigns_for_a_already_registered_club_member(){
         when(clubMemberRepository.findByClubMemberEmail("joao.avelange@testemail.com"))
                 .thenReturn(Optional.of(mockClubMemberRepository()));
-        when(campaignClient.getCampaignByUserId(1l))
+        when(campaignClient.getCampaignsByTeamName(Mockito.any()))
                 .thenReturn(new ArrayList<>());
 
         ClubMemberResponseDataContract clubMember = clubMemberService.createClubMember(mockClubMemberDataContract());

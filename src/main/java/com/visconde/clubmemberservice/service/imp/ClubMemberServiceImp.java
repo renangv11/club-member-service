@@ -13,8 +13,12 @@ import com.visconde.clubmemberservice.service.ClubMemberService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
+import static java.util.concurrent.CompletableFuture.*;
 
 @AllArgsConstructor
 @Service
@@ -38,18 +42,27 @@ public class ClubMemberServiceImp implements ClubMemberService {
     }
 
     private ClubMemberResponseDataContract alreadyRegisteredClubMember(ClubMember clubMember) {
-        List<CampaignDataContract> campaigns = campaignClient.getCampaignByUserId(clubMember.getClubMemberId());
+        List<CampaignDataContract> campaignsByTeam = getCampaignByTeam(clubMember.getClubMemberTeam());
 
-        if(!campaigns.isEmpty()){
+        if(!campaignsByTeam.isEmpty()){
             throw new AlreadyRegisteredClientException("Cliente já cadastrado");
         }
 
         associateCampaignProducer.send(clubMemberConverter.convertEntityToDataContract(clubMember));
 
         return ClubMemberResponseDataContract.builder()
-                .campaigns(campaigns)
+                .campaigns(campaignsByTeam)
                 .clubMemberDataContract(clubMemberConverter.convertEntityToDataContract(clubMember))
                 .build();
+    }
+
+    private List<CampaignDataContract> getCampaignByTeam(String teamName) {
+        CompletableFuture<List<CampaignDataContract>> campaignFuture = supplyAsync(() -> {
+            return campaignClient.getCampaignsByTeamName(teamName);
+        }).exceptionally(exception -> {
+            return new ArrayList<CampaignDataContract>();
+        });
+        return campaignFuture.join();
     }
 
     private ClubMemberResponseDataContract registerClubMember(ClubMemberDataContract clubMemberDataContract) {

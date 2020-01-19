@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(value = "localhost:8080")
+@FeignClient(value = "${urlCampaign}")
 public interface CampaignClient {
     @GetMapping("/campanha")
-    List<CampaignDataContract> getCampaignByUserId(@RequestParam("id_socio") Long id);
+    List<CampaignDataContract> getCampaignsByTeamName(@RequestParam("nome_time") String teamName);
 }
